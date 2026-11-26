@@ -1,3 +1,9 @@
+export function configurePlaybackSession(platform) {
+  try {
+    if (platform.audioSession) platform.audioSession.type = 'playback';
+  } catch { /* Audio Session is optional; older browsers still use Web Audio. */ }
+}
+
 /** One independent sample per press. A generation token cancels delayed starts. */
 export class HoldAudio {
   constructor({ context, loadBuffer, onState = () => {} }) {
@@ -22,6 +28,10 @@ export class HoldAudio {
     return this.loading;
   }
 
+  unlock() {
+    return this.context.resume();
+  }
+
   async press() {
     this.stopSource();
     const generation = ++this.generation;
@@ -29,7 +39,7 @@ export class HoldAudio {
     this.onState(this.buffer ? 'starting' : 'loading');
     try {
       // Call resume in the original user gesture, before awaiting network work.
-      await Promise.all([this.context.resume(), this.preload()]);
+      await Promise.all([this.unlock(), this.preload()]);
       if (!this.held || generation !== this.generation) return;
       const source = this.context.createBufferSource();
       source.buffer = this.buffer;

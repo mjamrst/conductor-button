@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { HoldAudio } from '../public/audio-engine.js';
+import { HoldAudio, configurePlaybackSession } from '../public/audio-engine.js';
 
 function fixture(loadBuffer = async () => ({ duration: 8 })) {
   const sources = [], states = [];
@@ -88,4 +88,28 @@ test('a superseded resume never starts or stops the newer playback', async () =>
   await first;
   assert.equal(sources.length, 1);
   assert.equal(sources[0].stopped, undefined);
+});
+
+test('iPhone audio uses the media playback session, with safe optional API support', () => {
+  const platform = { audioSession: { type: 'auto' } };
+  configurePlaybackSession(platform);
+  assert.equal(platform.audioSession.type, 'playback');
+  assert.doesNotThrow(() => configurePlaybackSession({}));
+  assert.doesNotThrow(() => configurePlaybackSession({
+    audioSession: { set type(value) { throw new Error('Unsupported'); } },
+  }));
+});
+
+test('touchend unlocks a suspended context without playing the released clip', async () => {
+  const { engine, context, sources } = fixture();
+  let resolveFirst;
+  context.resume = () => new Promise(r => { resolveFirst = r; });
+  const pending = engine.press();
+  engine.release();
+  context.resume = async () => { resolveFirst(); };
+  await engine.unlock();
+  await pending;
+  assert.equal(sources.length, 0);
+  await engine.press();
+  assert.equal(sources.length, 1);
 });

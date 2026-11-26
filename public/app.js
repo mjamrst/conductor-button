@@ -1,4 +1,4 @@
-import { HoldAudio } from './audio-engine.js';
+import { HoldAudio, configurePlaybackSession } from './audio-engine.js?v=2';
 
 const panel = document.querySelector('.intercom');
 const button = document.querySelector('.talk-button');
@@ -35,6 +35,9 @@ function getEngine() {
   if (engine) return engine;
   const AudioContext = window.AudioContext || window.webkitAudioContext;
   if (!AudioContext) throw new Error('Web Audio is unavailable');
+  // On iPhone the default Web Audio session obeys the ring/silent switch.
+  // This app's only purpose is explicitly requested media playback.
+  configurePlaybackSession(navigator);
   const context = new AudioContext({ latencyHint: 'interactive' });
   engine = new HoldAudio({
     context,
@@ -58,7 +61,10 @@ function press(input) {
   button.classList.add('is-held');
   button.setAttribute('aria-pressed', 'true');
   haptic(18);
-  try { void getEngine().press(); } catch { showState('error'); }
+  try {
+    configurePlaybackSession(navigator);
+    void getEngine().press();
+  } catch { showState('error'); }
 }
 
 function release() {
@@ -73,11 +79,34 @@ function release() {
 }
 
 button.addEventListener('pointerdown', event => {
+  // Safari's touch gesture must reach touchstart, rather than being consumed
+  // by preventDefault on the preceding pointer event.
+  if (event.pointerType === 'touch') return;
   if (!event.isPrimary || event.button !== 0 || activeInput !== null) return;
   event.preventDefault();
   button.focus({ preventScroll: true });
   button.setPointerCapture(event.pointerId);
   press(event.pointerId);
+});
+
+button.addEventListener('touchstart', event => {
+  event.preventDefault();
+  if (activeInput !== null) return;
+  const touch = event.changedTouches[0];
+  if (touch) press(`touch:${touch.identifier}`);
+}, { passive: false });
+
+button.addEventListener('touchend', event => {
+  event.preventDefault();
+  if (!Array.from(event.changedTouches).some(touch => activeInput === `touch:${touch.identifier}`)) return;
+  release();
+  // Some Safari versions only grant activation on touchend. Unlock for the
+  // next hold without ever playing the released sample after the finger lifts.
+  try { void getEngine().unlock().catch(() => {}); } catch { /* Retry on next press. */ }
+}, { passive: false });
+
+button.addEventListener('touchcancel', event => {
+  if (Array.from(event.changedTouches).some(touch => activeInput === `touch:${touch.identifier}`)) release();
 });
 
 for (const type of ['pointerup', 'pointercancel', 'lostpointercapture']) {
