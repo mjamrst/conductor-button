@@ -1,0 +1,11 @@
+{
+  "name": "conductor-button",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node scripts/serve.mjs",
+    "test": "node --test",
+    "build": "node --check public/app.js && node --check public/audio-engine.js"
+  }
+}
