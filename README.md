@@ -4,6 +4,8 @@ A small subway intercom for “Conductor, we have a problem.”
 
 Press the red button to start the supplied eight-second recording from the beginning. Keep holding to hear the full clip; releasing stops it immediately. Each new press starts over. Space works anywhere on the page, and Enter works while the button is focused. Screen-reader activation toggles playback.
 
+The Pitch slider moves from one octave below to one octave above the original recording, in semitone steps. Center it for normal pitch. Changes apply immediately, including while holding the button with another finger. Pitch uses sample detuning, so lower settings also slow playback and higher settings speed it up.
+
 The button depresses and springs back, with short press/release vibration pulses when the browser and device support the Vibration API. Unsupported devices still get the animated button and green playback indicator. Reduced-motion preferences remove the spring animation.
 
 ## Development

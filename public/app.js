@@ -1,9 +1,11 @@
-import { HoldAudio, configurePlaybackSession } from './audio-engine.js?v=2';
+import { HoldAudio, configurePlaybackSession } from './audio-engine.js?v=3';
 
 const panel = document.querySelector('.intercom');
 const button = document.querySelector('.talk-button');
 const status = document.querySelector('.status');
 const speaker = document.querySelector('.speaker');
+const pitch = document.querySelector('#pitch');
+const pitchValue = document.querySelector('#pitch-value');
 
 for (let y = -4; y <= 4; y++) {
   for (let x = -4; x <= 4; x++) {
@@ -48,8 +50,16 @@ function getEngine() {
       return context.decodeAudioData(await response.arrayBuffer());
     },
   });
+  engine.setPitch(Number(pitch.value));
   return engine;
 }
+
+pitch.addEventListener('input', () => {
+  const semitones = Number(pitch.value);
+  engine?.setPitch(semitones);
+  pitchValue.textContent = semitones === 0 ? 'Normal' : `${semitones > 0 ? '+' : '−'}${Math.abs(semitones)} semitone${Math.abs(semitones) === 1 ? '' : 's'}`;
+  pitch.setAttribute('aria-valuetext', semitones === 0 ? 'Normal pitch' : `${Math.abs(semitones)} semitone${Math.abs(semitones) === 1 ? '' : 's'} ${semitones > 0 ? 'higher' : 'lower'}`);
+});
 
 function haptic(duration) {
   try { navigator.vibrate?.(duration); } catch { /* Optional device feedback. */ }

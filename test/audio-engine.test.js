@@ -5,9 +5,12 @@ import { HoldAudio, configurePlaybackSession } from '../public/audio-engine.js';
 function fixture(loadBuffer = async () => ({ duration: 8 })) {
   const sources = [], states = [];
   const context = {
-    destination: {}, resume: async () => {},
+    destination: {}, currentTime: 0, resume: async () => {},
     createBufferSource() {
-      const source = { connect() {}, disconnect() {}, start(at) { this.startedAt = at; }, stop() { this.stopped = true; } };
+      const source = {
+        connect() {}, disconnect() {}, start(at) { this.startedAt = at; }, stop() { this.stopped = true; },
+        detune: { value: 0, setValueAtTime(value) { this.value = value; }, setTargetAtTime(value) { this.value = value; } },
+      };
       sources.push(source);
       return source;
     },
@@ -112,4 +115,29 @@ test('touchend unlocks a suspended context without playing the released clip', a
   assert.equal(sources.length, 0);
   await engine.press();
   assert.equal(sources.length, 1);
+});
+
+test('pitch changes apply before playback, live, and to subsequent presses', async () => {
+  const { engine, sources } = fixture();
+  engine.setPitch(-12);
+  await engine.press();
+  assert.equal(sources[0].detune.value, -1200);
+  engine.setPitch(7);
+  assert.equal(sources[0].detune.value, 700);
+  assert.equal(sources.length, 1, 'changing pitch must not restart playback');
+  engine.release();
+  await engine.press();
+  assert.equal(sources[1].detune.value, 700);
+  engine.setPitch(0);
+  assert.equal(sources[1].detune.value, 0);
+});
+
+test('pitch selected during loading applies when the held sample starts', async () => {
+  let resolve;
+  const { engine, sources } = fixture(() => new Promise(r => { resolve = r; }));
+  const pending = engine.press();
+  engine.setPitch(12);
+  resolve({ duration: 8 });
+  await pending;
+  assert.equal(sources[0].detune.value, 1200);
 });

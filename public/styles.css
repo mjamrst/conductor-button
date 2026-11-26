@@ -137,7 +137,7 @@ h1 {
   grid-template-rows: repeat(9, 1fr);
   place-items: center;
 }
-.speaker i, .microphone i {
+.speaker i {
   display: block;
   border-radius: 50%;
   width: 2.85cqw;
@@ -146,18 +146,68 @@ h1 {
   box-shadow: inset 0 1px 2px #060e06, 0 1px 0 1px #eee7cc80, 0 -1px 1px #74725c;
 }
 .speaker i.empty { visibility: hidden; }
-.microphone {
+.pitch-control {
   position: absolute;
-  width: 10.5cqw;
-  height: 10.5cqw;
-  left: 44.75cqw;
-  top: 118cqw;
+  top: 104cqw;
+  left: 17cqw;
+  right: 17cqw;
 }
-.microphone i { position: absolute; width: 2.6cqw; height: 2.6cqw; }
-.microphone i:nth-child(2) { right: 0; }
-.microphone i:nth-child(3) { left: 3.95cqw; top: 3.95cqw; }
-.microphone i:nth-child(4) { bottom: 0; }
-.microphone i:nth-child(5) { bottom: 0; right: 0; }
+.pitch-heading, .pitch-scale {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  text-transform: uppercase;
+  text-shadow: 0 1px 0 #fff9df8c;
+  line-height: 1.2;
+}
+.pitch-heading { font-size: 14px; letter-spacing: .08em; }
+.pitch-heading output { font-size: 12px; letter-spacing: .04em; }
+.pitch-scale { font-size: 12px; letter-spacing: .06em; }
+#pitch {
+  display: block;
+  width: 100%;
+  height: 44px;
+  margin: 0;
+  padding: 0;
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
+  cursor: ew-resize;
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+}
+#pitch::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: 3px;
+  background: linear-gradient(90deg, #373d31 49.5%, #ded9bf 49.5% 50.5%, #373d31 50.5%);
+  box-shadow: inset 0 1px 2px #080f09, 0 1px 0 #f1e9cf;
+}
+#pitch::-moz-range-track {
+  height: 6px;
+  border-radius: 3px;
+  background: linear-gradient(90deg, #373d31 49.5%, #ded9bf 49.5% 50.5%, #373d31 50.5%);
+  box-shadow: inset 0 1px 2px #080f09, 0 1px 0 #f1e9cf;
+}
+#pitch::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 26px;
+  height: 30px;
+  margin-top: -12px;
+  border: 1px solid #5b5d50;
+  border-radius: 4px;
+  background: linear-gradient(90deg, transparent 46%, #3d4338 46% 54%, transparent 54%), linear-gradient(#e5e1cb, #aeae99 45%, #cac7af 52%, #949782);
+  box-shadow: inset 0 1px 0 #fff8dd, 0 2px 0 #676b58, 0 3px 4px #171d1966;
+}
+#pitch::-moz-range-thumb {
+  width: 26px;
+  height: 30px;
+  border: 1px solid #5b5d50;
+  border-radius: 4px;
+  background: linear-gradient(90deg, transparent 46%, #3d4338 46% 54%, transparent 54%), linear-gradient(#e5e1cb, #aeae99 45%, #cac7af 52%, #949782);
+  box-shadow: inset 0 1px 0 #fff8dd, 0 2px 0 #676b58, 0 3px 4px #171d1966;
+}
+#pitch:focus-visible { outline: 2px solid #454d3b; outline-offset: 2px; border-radius: 5px; }
 
 .controls {
   position: absolute;
@@ -259,7 +309,7 @@ h1 {
 .instructions span { display: block; font-size: 4cqw; letter-spacing: .27cqw; margin-top: 2.3cqw; }
 .status {
   position: absolute;
-  top: 132cqw;
+  top: 134cqw;
   width: 100%;
   text-align: center;
   margin: 0;

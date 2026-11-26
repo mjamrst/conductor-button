@@ -18,9 +18,12 @@ test('native touch starts once, ignores extra fingers, and stops on release/canc
   }
 
   const button = new Element(), panel = new Element(), status = new Element();
+  const pitch = new Element(), pitchValue = new Element();
+  pitch.value = '0';
   const document = new EventTarget();
   document.querySelector = selector => ({
     '.talk-button': button, '.intercom': panel, '.status': status, '.speaker': new Element(),
+    '#pitch': pitch, '#pitch-value': pitchValue,
   })[selector];
   document.createElement = () => new Element();
   const window = new EventTarget();
@@ -35,6 +38,7 @@ test('native touch starts once, ignores extra fingers, and stops on release/canc
       const source = {
         connect() {}, disconnect() {},
         start() { this.started = true; }, stop() { this.stopped = true; },
+        detune: { value: 0, setValueAtTime(value) { this.value = value; }, setTargetAtTime(value) { this.value = value; } },
       };
       sources.push(source);
       return source;
@@ -74,6 +78,13 @@ test('native touch starts once, ignores extra fingers, and stops on release/canc
     await tick();
     assert.equal(sources.length, 1);
     assert.equal(sources[0].stopped, undefined);
+
+    pitch.value = '-5';
+    pitch.dispatchEvent(new Event('input'));
+    assert.equal(sources[0].detune.value, -500);
+    assert.equal(pitchValue.textContent, '−5 semitones');
+    assert.equal(pitch.attributes.get('aria-valuetext'), '5 semitones lower');
+    assert.equal(button.attributes.get('aria-pressed'), 'true');
 
     send('touchend', { changedTouches: [{ identifier: 1 }] });
     await tick();

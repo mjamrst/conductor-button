@@ -15,6 +15,14 @@ export class HoldAudio {
     this.source = null;
     this.buffer = null;
     this.loading = null;
+    this.pitchSemitones = 0;
+  }
+
+  setPitch(semitones) {
+    if (!Number.isFinite(semitones)) return;
+    this.pitchSemitones = Math.max(-12, Math.min(12, semitones));
+    // Smooth live changes without restarting the currently held sample.
+    this.source?.detune.setTargetAtTime(this.pitchSemitones * 100, this.context.currentTime, 0.015);
   }
 
   preload() {
@@ -43,6 +51,7 @@ export class HoldAudio {
       if (!this.held || generation !== this.generation) return;
       const source = this.context.createBufferSource();
       source.buffer = this.buffer;
+      source.detune.setValueAtTime(this.pitchSemitones * 100, this.context.currentTime);
       source.connect(this.context.destination);
       source.onended = () => {
         source.disconnect();

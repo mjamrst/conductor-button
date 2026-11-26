@@ -7,9 +7,9 @@
     <meta name="description" content="Conductor, we have a problem. Press, hold, and let it out." />
     <title>Conductor — Emergency Intercom</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="stylesheet" href="/styles.css" />
+    <link rel="stylesheet" href="/styles.css?v=3" />
     <link rel="preload" href="/audio/conductor.wav" as="fetch" crossorigin />
-    <script type="module" src="/app.js?v=2"></script>
+    <script type="module" src="/app.js?v=3"></script>
   </head>
   <body>
     <main class="carriage" aria-label="Conductor sound button">
@@ -24,8 +24,14 @@
 
         <h1 id="intercom-title">Emergency<br />Intercom</h1>
         <div class="speaker" aria-hidden="true"></div>
-        <div class="microphone" aria-hidden="true">
-          <i></i><i></i><i></i><i></i><i></i>
+        <div class="pitch-control">
+          <div class="pitch-heading">
+            <label for="pitch">Pitch</label>
+            <output id="pitch-value" for="pitch" aria-live="off">Normal</output>
+          </div>
+          <input id="pitch" type="range" min="-12" max="12" step="1" value="0" aria-valuetext="Normal pitch" aria-describedby="pitch-help" />
+          <div class="pitch-scale" aria-hidden="true"><span>Low</span><span>Normal</span><span>High</span></div>
+          <p class="sr-only" id="pitch-help">Lower pitch also slows the audio. Higher pitch speeds it up. The center is the original recording.</p>
         </div>
 
         <div class="controls">
